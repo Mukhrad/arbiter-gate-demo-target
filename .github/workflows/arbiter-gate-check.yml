@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   route-and-verify:
-    name: Arbiter Gate / route-and-verify
+    name: route-and-verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
