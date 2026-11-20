@@ -1,0 +1,40 @@
+name: Arbiter Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  route-and-verify:
+    name: Arbiter Gate / route-and-verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (pinned Arbiter Gate release)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Route and verify (real pytest subprocesses, no scripted result)
+        run: python scripts/route_and_verify.py --output artifacts
+
+      - name: Upload decision audit
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: arbiter-gate-decision-audit
+          path: |
+            artifacts/decision_audit.jsonl
+            artifacts/summary.json
+          retention-days: 30
