@@ -80,6 +80,12 @@
       "pending_open": 0
     }
   },
+  "persistent_state": {
+    "load_detail": "no_state_file",
+    "loaded_from_prior_run": false,
+    "repo_id": "Mukhrad/arbiter-gate-demo-target",
+    "state_file": "/home/runner/work/arbiter-gate-demo-target/arbiter-gate-demo-target/.arbiter_state/gate_state.json"
+  },
   "rounds": 3,
   "verdict": "ROUTE_AND_VERIFY_PASSED"
 }

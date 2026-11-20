@@ -1,0 +1,67 @@
+{
+  "gate_state": {
+    "cooldown_state": {
+      "auth-token-validation": {
+        "blocked_in_a_row": 0,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      },
+      "devops-migration-sql": {
+        "blocked_in_a_row": 0,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      },
+      "docs-formatting": {
+        "blocked_in_a_row": 1,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      },
+      "finops-cost-anomaly": {
+        "blocked_in_a_row": 0,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      },
+      "finops-report-formatting": {
+        "blocked_in_a_row": 1,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      }
+    },
+    "decisions_per_bucket": {
+      "auth-token-validation": 3,
+      "devops-migration-sql": 3,
+      "docs-formatting": 3,
+      "finops-cost-anomaly": 3,
+      "finops-report-formatting": 3
+    },
+    "schema_version": 1,
+    "value_stats": {
+      "auth-token-validation": {
+        "count": 2,
+        "m2": 0.0,
+        "mean": 1.0
+      },
+      "devops-migration-sql": {
+        "count": 2,
+        "m2": 0.0,
+        "mean": 1.0
+      },
+      "docs-formatting": {
+        "count": 2,
+        "m2": 0.0,
+        "mean": 0.0
+      },
+      "finops-cost-anomaly": {
+        "count": 2,
+        "m2": 0.0,
+        "mean": 1.0
+      },
+      "finops-report-formatting": {
+        "count": 2,
+        "m2": 0.0,
+        "mean": 0.0
+      }
+    }
+  },
+  "repo_id": "Mukhrad/arbiter-gate-demo-target"
+}
