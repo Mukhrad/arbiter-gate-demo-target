@@ -1,10 +1,13 @@
 {
   "all_final_deployments_passed": true,
   "audit_log": "decision_audit.jsonl",
-  "decisions": 6,
+  "decisions": 15,
   "final_routes": {
     "auth-token-validation": "deep",
-    "docs-formatting": "cheap"
+    "devops-migration-sql": "deep",
+    "docs-formatting": "cheap",
+    "finops-cost-anomaly": "deep",
+    "finops-report-formatting": "cheap"
   },
   "gate_diagnostics": {
     "cooldown": {
@@ -13,7 +16,22 @@
         "cooldown_remaining": 0,
         "negative_streak": 0
       },
+      "devops-migration-sql": {
+        "blocked_in_a_row": 0,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      },
       "docs-formatting": {
+        "blocked_in_a_row": 1,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      },
+      "finops-cost-anomaly": {
+        "blocked_in_a_row": 0,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      },
+      "finops-report-formatting": {
         "blocked_in_a_row": 1,
         "cooldown_remaining": 0,
         "negative_streak": 0
@@ -21,7 +39,10 @@
     },
     "decisions_per_bucket": {
       "auth-token-validation": 3,
-      "docs-formatting": 3
+      "devops-migration-sql": 3,
+      "docs-formatting": 3,
+      "finops-cost-anomaly": 3,
+      "finops-report-formatting": 3
     },
     "value": {
       "buckets": {
@@ -31,7 +52,25 @@
           "mean": 1.0,
           "stderr": 0.0
         },
+        "devops-migration-sql": {
+          "count": 2,
+          "lcb": 1.0,
+          "mean": 1.0,
+          "stderr": 0.0
+        },
         "docs-formatting": {
+          "count": 2,
+          "lcb": 0.0,
+          "mean": 0.0,
+          "stderr": 0.0
+        },
+        "finops-cost-anomaly": {
+          "count": 2,
+          "lcb": 1.0,
+          "mean": 1.0,
+          "stderr": 0.0
+        },
+        "finops-report-formatting": {
           "count": 2,
           "lcb": 0.0,
           "mean": 0.0,
