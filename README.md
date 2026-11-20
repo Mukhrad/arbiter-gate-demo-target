@@ -45,6 +45,19 @@ deployment passed, and the gate's internal diagnostics) as a workflow
 artifact. Cost figures in the audit are illustrative unit costs, not
 measured dollars — flagged as such in the audit itself.
 
+## What a reviewer should look for
+
+Open the "Arbiter Gate / route-and-verify" check on any pull request in
+this repo (including this one, which touches no application code). Its
+uploaded `summary.json` names, per bucket, which path was actually
+deployed in the final round and whether that deployment's own tests
+passed -- and for `docs-formatting` specifically, that the thorough path
+was tried, measured, and then stopped because it never beat the fast
+one. That stopping is the saved-cost half of the story; the
+`auth-token-validation` bucket (see the `fix/auth-token-expiry-window`
+history) is the half where stopping early would have been the wrong
+call, and the audit shows a real test failure proving it.
+
 ## Dependency
 
 This repo depends on the published
