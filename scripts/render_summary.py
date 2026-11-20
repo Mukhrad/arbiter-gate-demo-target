@@ -27,6 +27,22 @@ def main() -> int:
     print(f"**Verdict:** `{summary['verdict']}`  ")
     print(f"**Final routes:** " + ", ".join(f"`{b}` -> `{p}`" for b, p in summary["final_routes"].items()) + "\n")
 
+    state = summary.get("persistent_state")
+    if state:
+        if state["loaded_from_prior_run"]:
+            print(
+                f"**Learned state:** loaded from a prior run "
+                f"(`{state['load_detail']}`) -- decisions above may already "
+                f"reflect accumulated evidence rather than starting at "
+                f"\"exploring\".\n"
+            )
+        else:
+            print(
+                f"**Learned state:** none carried over this run "
+                f"(`{state['load_detail']}`) -- every bucket below started "
+                f"from zero.\n"
+            )
+
     for bucket in summary["final_routes"]:
         bucket_rows = [r for r in rows if r["bucket"] == bucket]
         print(f"### {bucket} — {bucket_rows[0]['title']}\n")
