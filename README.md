@@ -47,6 +47,20 @@ deployment passed, and the gate's internal diagnostics) as a workflow
 artifact. Cost figures in the audit are illustrative unit costs, not
 measured dollars — flagged as such in the audit itself.
 
+**You do not need a GitHub account to see this evidence.** Downloading a
+workflow artifact requires a GitHub sign-in, which is a real barrier for
+an outside reviewer, so the same evidence is also published two other
+ways that need no sign-in at all:
+
+- Every run's own [Summary page](https://github.com/Mukhrad/arbiter-gate-demo-target/actions/workflows/arbiter-gate-check.yml)
+  renders the decision table and, for the `auth-token-validation`
+  bucket, the real (unedited) `pytest` failure output of the fast
+  candidate -- see `scripts/render_summary.py`.
+- [`proof/latest/`](proof/latest) in this repo is overwritten by CI on
+  every push to `main` with that run's own `decision_audit.jsonl` and
+  `summary.json` -- an ordinary file in the repo, browsable like any
+  other.
+
 ## What a reviewer should look for
 
 Open the "Arbiter Gate / route-and-verify" check on any pull request in
@@ -59,6 +73,25 @@ one. That stopping is the saved-cost half of the story; the
 `auth-token-validation` bucket (see the `fix/auth-token-expiry-window`
 history) is the half where stopping early would have been the wrong
 call, and the audit shows a real test failure proving it.
+
+## Known limitations
+
+- **The gate is stateless across runs, on purpose.** Each CI run builds
+  a fresh `ArbiterGate` and replays 3 rounds in one process; it does not
+  persist trust across separate pushes or PRs. This keeps the workflow
+  to `contents: read` for the check itself (only the separate
+  `publish-latest-proof` job, which runs solely on pushes to `main`, has
+  `contents: write`, scoped to committing `proof/latest/`). A production
+  integration would persist the gate's state between runs; this demo
+  intentionally does not, to keep the check itself free of any write
+  permission. What's real here is the decision mechanism and the
+  measurement, not a claim of accumulated production trust.
+- **Costs are illustrative unit costs**, not measured dollars or latency
+  from a real model call -- flagged as such in the audit itself.
+- **Two buckets, not a general classifier.** This repo shows the
+  mechanism on two hand-picked cases, not an automatic way to decide
+  which bucket a new kind of change belongs to; that classification is
+  still the integrator's job.
 
 ## Live proof
 

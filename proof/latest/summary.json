@@ -1,0 +1,46 @@
+{
+  "all_final_deployments_passed": true,
+  "audit_log": "decision_audit.jsonl",
+  "decisions": 6,
+  "final_routes": {
+    "auth-token-validation": "deep",
+    "docs-formatting": "cheap"
+  },
+  "gate_diagnostics": {
+    "cooldown": {
+      "auth-token-validation": {
+        "blocked_in_a_row": 0,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      },
+      "docs-formatting": {
+        "blocked_in_a_row": 1,
+        "cooldown_remaining": 0,
+        "negative_streak": 0
+      }
+    },
+    "decisions_per_bucket": {
+      "auth-token-validation": 3,
+      "docs-formatting": 3
+    },
+    "value": {
+      "buckets": {
+        "auth-token-validation": {
+          "count": 2,
+          "lcb": 1.0,
+          "mean": 1.0,
+          "stderr": 0.0
+        },
+        "docs-formatting": {
+          "count": 2,
+          "lcb": 0.0,
+          "mean": 0.0,
+          "stderr": 0.0
+        }
+      },
+      "pending_open": 0
+    }
+  },
+  "rounds": 3,
+  "verdict": "ROUTE_AND_VERIFY_PASSED"
+}
