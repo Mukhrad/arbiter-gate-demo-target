@@ -2,10 +2,12 @@
 
 [![Arbiter Gate](https://github.com/Mukhrad/arbiter-gate-demo-target/actions/workflows/arbiter-gate-check.yml/badge.svg)](https://github.com/Mukhrad/arbiter-gate-demo-target/actions/workflows/arbiter-gate-check.yml)
 
-A small, real Python app used to show [Arbiter Gate](https://github.com/Mukhrad/arbiter-gate)
-making an actual, auditable cheap-vs-deep routing decision — not a scripted
-demo page, but a real `pytest` run inside a real GitHub Actions check on
-real pull requests in this repository.
+A real, growing test platform for [Arbiter Gate](https://github.com/Mukhrad/arbiter-gate)
+across multiple verticals -- not a scripted demo page, but a real
+`pytest` run inside a real GitHub Actions check on real pull requests in
+this repository. See [GOVERNANCE.md](GOVERNANCE.md) for how this
+platform is built, tested, and independently reviewed (the "Client
+Nucleus" protocol).
 
 ## What's here
 
@@ -27,25 +29,42 @@ real pull requests in this repository.
   **`Arbiter Gate / route-and-verify`**, and its pass/fail reflects a real
   test result, not a static status.
 
-## Why the two cases
+## Verticals and buckets
 
-- **`auth-token-validation`** is the case where the decision matters: the
-  fast check accepts a token with no lower bound on its age, so a
-  future-issued (clock-skewed or forged) token slips through. The deep
-  check catches it. This is a real bug, caught by a real test, not a
-  staged scenario.
-- **`docs-formatting`** is the case where it doesn't: both candidates are
-  functionally identical, so after a short exploration window Arbiter
-  Gate measures zero advantage from the expensive path and stops running
-  it — the saved-cost half of the same story.
+Each vertical pairs a genuine safety- or cost-relevant case with a
+genuine "cheap already suffices" counter-case:
+
+**DevOps / coding agents**
+- **`auth-token-validation`** — the fast check accepts a token with no
+  lower bound on its age, so a future-issued (clock-skewed or forged)
+  token slips through; the deep check catches it. A real bug, caught by
+  a real test.
+- **`devops-migration-sql`** — the fast candidate emits a plain
+  `CREATE INDEX`, which takes a table-locking write lock for the
+  duration of the build; the deep candidate emits `CREATE INDEX
+  CONCURRENTLY`. On a real production table this is the difference
+  between a no-op and an outage.
+- **`docs-formatting`** — both candidates are functionally identical, so
+  after a short exploration window Arbiter Gate measures zero advantage
+  from the expensive path and stops running it.
+
+**FinOps / agent fleet cost governance**
+- **`finops-cost-anomaly`** — the fast check only watches a fixed
+  hard-cap dollar threshold per hour; it misses a stuck agent retry loop
+  that sustains ~3x the fleet's own baseline spend for half a day
+  without ever crossing the cap. The deep check compares against the
+  fleet's recent baseline and catches it.
+- **`finops-report-formatting`** — both candidates produce an identical
+  summary string; the expensive path buys nothing and Arbiter Gate stops
+  paying for it.
 
 ## Decision audit
 
-Every CI run uploads `decision_audit.jsonl` (one line per decision, across
-3 rounds × 2 buckets) and `summary.json` (final routes, whether the final
+Every CI run uploads `decision_audit.jsonl` and `summary.json` (final routes, whether the final
 deployment passed, and the gate's internal diagnostics) as a workflow
-artifact. Cost figures in the audit are illustrative unit costs, not
-measured dollars — flagged as such in the audit itself.
+artifact (one line per decision, across 3 rounds × 5 buckets). Cost
+figures in the audit are illustrative unit costs, not measured dollars
+— flagged as such in the audit itself.
 
 **You do not need a GitHub account to see this evidence.** Downloading a
 workflow artifact requires a GitHub sign-in, which is a real barrier for
@@ -88,33 +107,32 @@ call, and the audit shows a real test failure proving it.
   measurement, not a claim of accumulated production trust.
 - **Costs are illustrative unit costs**, not measured dollars or latency
   from a real model call -- flagged as such in the audit itself.
-- **Two buckets, not a general classifier.** This repo shows the
-  mechanism on two hand-picked cases, not an automatic way to decide
-  which bucket a new kind of change belongs to; that classification is
-  still the integrator's job.
+- **A handful of hand-picked buckets, not a general classifier.** This
+  repo shows the mechanism on specific, verified cases across two
+  verticals, not an automatic way to decide which bucket a new kind of
+  change belongs to; that classification is still the integrator's job.
 
 ## Live proof
 
-Two merged pull requests are this repo's own evidence, kept open for
-review rather than squashed away:
+Every pull request below is this repo's own evidence, kept open for
+review rather than squashed away, and every verdict on them is logged
+under the "Client Nucleus" protocol in [GOVERNANCE.md](GOVERNANCE.md):
 
 - [PR #1 — Harden deep token check against future-issued tokens](https://github.com/Mukhrad/arbiter-gate-demo-target/pull/1)
-  — the security-sensitive case. The regression test and the fix land
-  in the same change; the CI run on that PR genuinely executed the fast
+  — security-sensitive. The CI run genuinely executed the fast
   candidate, watched it fail `test_future_issued_token_is_rejected`,
-  and escalated to the thorough one -- all recorded in that run's
-  `decision_audit.jsonl`.
+  and escalated to the thorough one.
 - [PR #2 — Docs: point reviewers at the decision audit, not just the check mark](https://github.com/Mukhrad/arbiter-gate-demo-target/pull/2)
-  — a documentation-only change, included as the deliberate contrast:
-  Arbiter Gate still ran, still measured both candidates for the
-  `docs-formatting` bucket, and settled on the fast one because the
-  thorough path never beat it. No code to fix, so no reason to pay for
-  the expensive path.
+  — documentation-only, the deliberate "cheap suffices" contrast.
+- PR #5 — adds `devops-migration-sql` (lock-safety) and the full FinOps
+  vertical (`finops-cost-anomaly`, `finops-report-formatting`), extending
+  the same escalate-when-real / stay-cheap-when-not story across a
+  second product vertical.
 
-Together they are the full pitch in two PRs: escalate when the evidence
-says to, stay cheap when it doesn't -- and both calls are visible as a
-real, named GitHub check (`Arbiter Gate / route-and-verify`), not a
-page that only describes what the gate would do.
+Escalate when the evidence says to, stay cheap when it doesn't -- and
+every one of these calls is visible as a real, named GitHub check
+(`Arbiter Gate / route-and-verify`), not a page that only describes what
+the gate would do.
 
 ## Dependency
 

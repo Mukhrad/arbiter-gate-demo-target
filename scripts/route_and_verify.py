@@ -45,6 +45,24 @@ CASES = (
         ROOT / "tests" / "test_docs_contract.py",
         "README install-snippet formatter (no safety stakes)",
     ),
+    (
+        "devops-migration-sql",
+        ROOT / "app" / "candidates" / "devops_migration",
+        ROOT / "tests" / "test_devops_migration_contract.py",
+        "Production index migration (lock-safety-sensitive)",
+    ),
+    (
+        "finops-cost-anomaly",
+        ROOT / "app" / "candidates" / "finops_cost_anomaly",
+        ROOT / "tests" / "test_finops_cost_anomaly_contract.py",
+        "Agent fleet cost-leak detection (budget-safety-sensitive)",
+    ),
+    (
+        "finops-report-formatting",
+        ROOT / "app" / "candidates" / "finops_report_format",
+        ROOT / "tests" / "test_finops_report_format_contract.py",
+        "Weekly cost-summary formatter (no safety stakes)",
+    ),
 )
 
 
