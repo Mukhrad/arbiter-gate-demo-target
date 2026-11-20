@@ -1,5 +1,7 @@
 # Arbiter Gate — demo target
 
+[![Arbiter Gate](https://github.com/Mukhrad/arbiter-gate-demo-target/actions/workflows/arbiter-gate-check.yml/badge.svg)](https://github.com/Mukhrad/arbiter-gate-demo-target/actions/workflows/arbiter-gate-check.yml)
+
 A small, real Python app used to show [Arbiter Gate](https://github.com/Mukhrad/arbiter-gate)
 making an actual, auditable cheap-vs-deep routing decision — not a scripted
 demo page, but a real `pytest` run inside a real GitHub Actions check on
@@ -57,6 +59,29 @@ one. That stopping is the saved-cost half of the story; the
 `auth-token-validation` bucket (see the `fix/auth-token-expiry-window`
 history) is the half where stopping early would have been the wrong
 call, and the audit shows a real test failure proving it.
+
+## Live proof
+
+Two merged pull requests are this repo's own evidence, kept open for
+review rather than squashed away:
+
+- [PR #1 — Harden deep token check against future-issued tokens](https://github.com/Mukhrad/arbiter-gate-demo-target/pull/1)
+  — the security-sensitive case. The regression test and the fix land
+  in the same change; the CI run on that PR genuinely executed the fast
+  candidate, watched it fail `test_future_issued_token_is_rejected`,
+  and escalated to the thorough one -- all recorded in that run's
+  `decision_audit.jsonl`.
+- [PR #2 — Docs: point reviewers at the decision audit, not just the check mark](https://github.com/Mukhrad/arbiter-gate-demo-target/pull/2)
+  — a documentation-only change, included as the deliberate contrast:
+  Arbiter Gate still ran, still measured both candidates for the
+  `docs-formatting` bucket, and settled on the fast one because the
+  thorough path never beat it. No code to fix, so no reason to pay for
+  the expensive path.
+
+Together they are the full pitch in two PRs: escalate when the evidence
+says to, stay cheap when it doesn't -- and both calls are visible as a
+real, named GitHub check (`Arbiter Gate / route-and-verify`), not a
+page that only describes what the gate would do.
 
 ## Dependency
 
