@@ -14,6 +14,17 @@ this repo's own code, on every push and pull request.
 Exit code reflects whether the path Arbiter Gate actually deployed in the
 final round passed its real tests -- that is what the GitHub Check status
 is reporting, not a static always-green stub.
+
+Starting with this script's v0.3.0-dependent revision, the gate's learned
+state (not any open/unreported decision, only settled evidence) is loaded
+from and saved back to .arbiter_state/gate_state.json, stamped with this
+repo's REPO_ID. On the very first run ever, no such file exists yet and the
+gate starts genuinely fresh -- every subsequent run picks up exactly where
+the last one left off, so a bucket that was already "trusted" or "blocked"
+in a prior run does not re-explore from zero. The file is committed back to
+the repo by the same publish-latest-proof CI job that already commits
+proof/latest/*, so it carries forward across GitHub Actions runs, which
+otherwise share no disk between them.
 """
 from __future__ import annotations
 
@@ -28,8 +39,11 @@ import tempfile
 from arbiter_gate.adapters.shadow import ShadowExecutionAdapter
 from arbiter_gate.core.gate import ArbiterGate, ArbiterGateConfig
 from arbiter_gate.core.value_estimator import ValueEstimatorConfig
+from arbiter_gate.integrations import load_state_or_new, save_state_atomic
 
 ROOT = Path(__file__).resolve().parent.parent
+REPO_ID = "Mukhrad/arbiter-gate-demo-target"
+DEFAULT_STATE_PATH = ROOT / ".arbiter_state" / "gate_state.json"
 
 # (bucket, candidates_dir, contract_test_file, human title)
 CASES = (
@@ -89,7 +103,7 @@ def run_candidate(candidates_dir: Path, contract_test: Path, candidate_name: str
     return payload, 1.0 if passed else 0.0
 
 
-def run_all(output_dir: Path, rounds: int = 3) -> dict:
+def run_all(output_dir: Path, rounds: int = 3, state_path: Path = DEFAULT_STATE_PATH) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     audit_path = output_dir / "decision_audit.jsonl"
     config = ArbiterGateConfig(
@@ -100,7 +114,7 @@ def run_all(output_dir: Path, rounds: int = 3) -> dict:
             value_margin=0.0,
         ),
     )
-    gate = ArbiterGate(config)
+    gate, state_load_report = load_state_or_new(state_path, REPO_ID, config)
     audit: list[dict] = []
 
     for round_index in range(1, rounds + 1):
@@ -137,6 +151,7 @@ def run_all(output_dir: Path, rounds: int = 3) -> dict:
         "".join(json.dumps(row, sort_keys=True) + "\n" for row in audit),
         encoding="utf-8",
     )
+    save_state_atomic(gate, state_path, REPO_ID)
     final_round = [row for row in audit if row["round"] == rounds]
     summary = {
         "verdict": "ROUTE_AND_VERIFY_PASSED"
@@ -148,6 +163,12 @@ def run_all(output_dir: Path, rounds: int = 3) -> dict:
         "all_final_deployments_passed": all(row["deployed"]["passed"] for row in final_round),
         "gate_diagnostics": gate.diagnostics(),
         "audit_log": audit_path.name,
+        "persistent_state": {
+            "repo_id": REPO_ID,
+            "state_file": str(state_path),
+            "loaded_from_prior_run": state_load_report["loaded"],
+            "load_detail": state_load_report["reason"],
+        },
     }
     (output_dir / "summary.json").write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -159,8 +180,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts")
     parser.add_argument("--rounds", type=int, default=3)
+    parser.add_argument("--state-path", type=Path, default=DEFAULT_STATE_PATH)
     args = parser.parse_args()
-    summary = run_all(args.output, args.rounds)
+    summary = run_all(args.output, args.rounds, args.state_path)
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0 if summary["verdict"] == "ROUTE_AND_VERIFY_PASSED" else 1
 

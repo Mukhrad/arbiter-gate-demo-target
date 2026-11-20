@@ -66,17 +66,17 @@ jobs:
       - name: Route and verify again for the committed snapshot
         run: python scripts/route_and_verify.py --output proof/latest
 
-      - name: Commit updated proof snapshot, if it changed
+      - name: Commit updated proof snapshot and gate state, if changed
         run: |
           git config user.name "arbiter-gate-bot"
           git config user.email "actions@users.noreply.github.com"
-          if git diff --quiet -- proof/latest; then
-            echo "No change in proof/latest; nothing to commit."
+          if git diff --quiet -- proof/latest .arbiter_state; then
+            echo "No change in proof/latest or .arbiter_state; nothing to commit."
             exit 0
           fi
-          git add proof/latest
+          git add proof/latest .arbiter_state
           git commit \
-            -m "Update proof/latest from main @ ${GITHUB_SHA}" \
-            -m "Automated, no-human-authorship commit: republishes this same run's own decision_audit.jsonl / summary.json as plain repo files, readable without a GitHub sign-in or opening Actions." \
+            -m "Update proof/latest and gate state from main @ ${GITHUB_SHA}" \
+            -m "Automated, no-human-authorship commit: republishes this same run's own decision_audit.jsonl / summary.json as plain repo files (readable without a GitHub sign-in or opening Actions), and commits the gate's learned state (.arbiter_state/gate_state.json) so the NEXT run starts from this run's accumulated evidence instead of re-exploring from zero." \
             -m "Co-Authored-By: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
           git push

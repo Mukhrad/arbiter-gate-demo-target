@@ -80,6 +80,16 @@ ways that need no sign-in at all:
   `summary.json` -- an ordinary file in the repo, browsable like any
   other.
 
+Each run's `summary.json` also reports `persistent_state`: whether this
+run loaded learned evidence from
+[`.arbiter_state/gate_state.json`](.arbiter_state) (another ordinary,
+no-sign-in-needed repo file) or started genuinely fresh. When it loaded
+prior state, decisions in round 1 of that run may already read
+`"trusted"` or `"blocked"` instead of `"exploring"` -- that is the
+mechanism actually carrying evidence across separate CI runs, not a
+reset each time. See "Known limitations" below for exactly what this
+does and does not prove.
+
 ## What a reviewer should look for
 
 Open the "Arbiter Gate / route-and-verify" check on any pull request in
@@ -95,16 +105,23 @@ call, and the audit shows a real test failure proving it.
 
 ## Known limitations
 
-- **The gate is stateless across runs, on purpose.** Each CI run builds
-  a fresh `ArbiterGate` and replays 3 rounds in one process; it does not
-  persist trust across separate pushes or PRs. This keeps the workflow
-  to `contents: read` for the check itself (only the separate
-  `publish-latest-proof` job, which runs solely on pushes to `main`, has
-  `contents: write`, scoped to committing `proof/latest/`). A production
-  integration would persist the gate's state between runs; this demo
-  intentionally does not, to keep the check itself free of any write
-  permission. What's real here is the decision mechanism and the
-  measurement, not a claim of accumulated production trust.
+- **The gate now persists settled evidence across separate CI runs**
+  (`.arbiter_state/gate_state.json`, committed by the same
+  `publish-latest-proof` job that already commits `proof/latest/` --
+  the PR-facing check itself stays `contents: read`; only that one job,
+  running solely on pushes to `main`, has `contents: write`). This
+  closes the specific gap an independent reviewer raised (every CI run
+  re-exploring from zero): verified locally, two consecutive runs
+  sharing the same state file show the second run's very first decision
+  on each bucket already `"trusted"` or `"blocked"`, not `"exploring"`.
+  **What this does not yet show**: that the resulting routing is
+  actually cheaper or better than a fixed baseline over many real,
+  independent decisions -- only that evidence correctly survives a
+  process boundary. A real continuing-benefit claim needs a shadow
+  comparison against a fixed baseline on cases this repo did not design
+  around (tracked as the next step in
+  [GOVERNANCE.md](GOVERNANCE.md) / `customer_nucleus/`), not more
+  buckets inside this repo.
 - **Costs are illustrative unit costs**, not measured dollars or latency
   from a real model call -- flagged as such in the audit itself.
 - **A handful of hand-picked buckets, not a general classifier.** This

@@ -1,3 +1,5 @@
-# Pinned to the arbiter-gate v0.2.1 release so this demo's behavior cannot
-# silently drift if the library changes later.
-arbiter-gate @ git+https://github.com/Mukhrad/arbiter-gate.git@v0.2.1
+# Pinned to the arbiter-gate v0.3.0 release so this demo's behavior cannot
+# silently drift if the library changes later. v0.3.0 adds opt-in persistent
+# gate state across process boundaries (arbiter_gate.integrations), which
+# this repo's route_and_verify.py now uses.
+arbiter-gate @ git+https://github.com/Mukhrad/arbiter-gate.git@v0.3.0
